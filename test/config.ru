@@ -43,6 +43,11 @@ class RootEndpoints < Gambino
 
     send_file 'test/some.txt'
   end
+
+  get '/halt' do
+
+    halt 400, "Hold My Beer"
+  end
 end
 
 run RootEndpoints

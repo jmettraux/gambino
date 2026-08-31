@@ -34,8 +34,8 @@ class Gambino
 
     def respond(r)
 
-      return r if is_rack_response_array?(r)
       return r.finish if r.is_a?(Rack::Response)
+      return r if is_rack_response_array?(r)
 
       res = response
 
@@ -56,7 +56,7 @@ class Gambino
 
       st, hs, bo = Rack::Files.new(File.dirname(path)).serving(request, path)
 
-      Rack::Response.new(bo, st, hs).finish
+      Rack::Response.new(bo, st, hs)
     end
 
     def not_found; Gambino::NOT_FOUND; end
@@ -69,6 +69,11 @@ class Gambino
       return false unless r[0].is_a?(Integer) && r[1].is_a?(Hash)
       return false unless r[2].is_a?(Array) || r[2].is_a?(Rack::Files::Iterator)
       true
+    end
+
+    def halt(status, body='', headers={})
+
+      throw :halt, Rack::Response.new(body, status, headers)
     end
   end
 
@@ -108,13 +113,17 @@ class Gambino
 
         ctx = Gambino::Context.new(env, m)
 
-        befores.each { |pa, bl| ctx.call(:before, bl) if pa.match?(pafo) }
+        res =
+          catch :halt do
 
-        r = ctx.call(:method, block)
+            befores.each { |pa, bl| ctx.call(:before, bl) if pa.match?(pafo) }
+            r = ctx.call(:method, block)
+            afters.each { |pa, bl| ctx.call(:after, bl) if pa.match?(pafo) }
 
-        afters.each { |pa, bl| ctx.call(:after, bl) if pa.match?(pafo) }
+            r
+          end
 
-        return ctx.respond(r)
+        return ctx.respond(res)
       end
 
       NOT_FOUND
