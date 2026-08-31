@@ -1,6 +1,9 @@
 GEM
   remote: https://rubygems.org/
   specs:
+    nio4r (2.7.5)
+    puma (8.0.2)
+      nio4r (~> 2.0)
     rack (2.2.24)
 
 PLATFORMS
@@ -8,6 +11,7 @@ PLATFORMS
   x86_64-openbsd-7.8
 
 DEPENDENCIES
+  puma
   rack (= 2.2.24)
 
 BUNDLED WITH
