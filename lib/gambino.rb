@@ -12,15 +12,24 @@ class Gambino
     #
   NOT_FOUND = [ 404, PLAIN, [ 'Not Found' ] ].freeze
 
-  class Request < ::Rack::Request
+  class Context
 
-    def initialize(env)
-      super
-      env['gambino.res'] = Rack::Response.new
+    attr_reader :env
+
+    def initialize(env); @env = env; end
+
+    def request; @req ||= Rack::Request.new(@env); end
+    def response; @res ||= Rack::Response.new; end
+
+    def respond(r)
+
+      res = response
+
+      r = [ r ] unless r.is_a?(Array)
+      r.each { |rr| res.write(rr.to_s) }
+
+      res.finish
     end
-
-    def request; self; end
-    def response; env['gambino.res']; end
   end
 
   class << self
@@ -51,15 +60,15 @@ class Gambino
         next if meth != method
         next unless pattern.match?(pafo)
 
-        req = Gambino::Request.new(env)
+        ctx = Gambino::Context.new(env)
 
-        befores.each { |pa, bl| req.instance_exec(&bl) if pa.match?(pafo) }
+        befores.each { |pa, bl| ctx.instance_exec(&bl) if pa.match?(pafo) }
 
-        r = req.instance_exec(&block)
+        r = ctx.instance_exec(&block)
 
-        afters.each { |pa, bl| req.instance_exec(&bl) if pa.match?(pafo) }
+        afters.each { |pa, bl| ctx.instance_exec(&bl) if pa.match?(pafo) }
 
-        return respond(req, r)
+        return ctx.respond(r)
       end
 
       NOT_FOUND
@@ -76,16 +85,6 @@ class Gambino
     def routes; (@routes ||= []); end
     def befores; (@befores ||= []); end
     def afters; (@afters ||= []); end
-
-    def respond(req, r)
-
-      res = req.response
-
-      r = [ r ] unless r.is_a?(Array)
-      r.each { |rr| res.write(rr.to_s) }
-
-      res.finish
-    end
 
     def put_env(env)
 
