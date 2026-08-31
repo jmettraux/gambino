@@ -28,26 +28,25 @@ class Gambino
     %w[ get post put patch delete head ].each do |method|
 
       define_method(method) do |pattern, &block|
-
-        (@routes ||= []) << [ method.upcase, compile(pattern), block ]
+        routes << [ method.upcase, compile(pattern), block ]
       end
     end
 
     def before(pattern=nil, &block)
-      (@befores ||= []) << [ compile(pattern), block ]
+      befores << [ compile(pattern), block ]
     end
     def after(pattern=nil, &block)
-      (@afters ||= []) << [ compile(pattern), block ]
+      afters << [ compile(pattern), block ]
     end
 
     def call(env)
 
-      put_env(env)
-
       meth = env['REQUEST_METHOD']
       pafo = env['PATH_INFO']
 
-      @routes.each do |method, pattern, block|
+      put_env(env) unless pafo.start_with?('/.well-known/')
+
+      routes.each do |method, pattern, block|
 
         next if meth != method
         next unless pattern.match?(pafo)
@@ -74,6 +73,7 @@ class Gambino
       pattern
     end
 
+    def routes; (@routes ||= []); end
     def befores; (@befores ||= []); end
     def afters; (@afters ||= []); end
 
