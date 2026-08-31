@@ -46,7 +46,13 @@ class RootEndpoints < Gambino
 
   get '/halt' do
 
-    halt 400, "Hold My Beer"
+    halt 400, 'Hold My Beer'
+  end
+
+  get '/etag' do
+
+    etag "hello4b02c354c06582"
+    'The Remains of the Day'
   end
 end
 

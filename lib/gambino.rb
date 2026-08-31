@@ -29,9 +29,6 @@ class Gambino
       end
     end
 
-    def request; @req ||= Rack::Request.new(@env); end
-    def response; @res ||= Rack::Response.new; end
-
     def respond(r)
 
       return r.finish if r.is_a?(Rack::Response)
@@ -47,6 +44,11 @@ class Gambino
 
     def call(stage, block); @stage = stage; self.instance_exec(&block); end
 
+    protected
+
+    def request; @req ||= Rack::Request.new(@env); end
+    def response; @res ||= Rack::Response.new; end
+
     def content_type(mime, opts={})
 
       response.content_type = mime
@@ -61,8 +63,6 @@ class Gambino
 
     def not_found; Gambino::NOT_FOUND; end
 
-    protected
-
     def is_rack_response_array?(r)
 
       return false unless r.is_a?(Array) && r.length == 3
@@ -74,6 +74,17 @@ class Gambino
     def halt(status, body='', headers={})
 
       throw :halt, Rack::Response.new(body, status, headers)
+    end
+
+    def etag(tag)
+
+      t = response['ETag'] = "\"#{tag}\""
+
+      if hinm = env['HTTP_IF_NONE_MATCH']
+        halt 304 if hinm == '*' || hinm == t
+      elsif him = env['HTTP_IF_MATCH']
+        halt 412 if him != '*' && him != t
+      end
     end
   end
 
