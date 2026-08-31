@@ -24,6 +24,11 @@ class RootEndpoints < Gambino
 
     'foo bar'
   end
+
+  get '/greet/:name' do
+
+    "hello #{params[:name]}!"
+  end
 end
 
 run RootEndpoints
