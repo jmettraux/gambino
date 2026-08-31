@@ -5,26 +5,9 @@
 
 class Gambino
 
-  class Response
-
-    def initialize(res)
-
-      @res = res
-    end
-
-    def to_a
-
-      [ 200, {}, @res.is_a?(Array) ? @res.map(&:to_s) : [ @res.to_s ] ]
-    end
-
-    class << self
-
-      def not_found_a
-
-        [ 404, { 'Content-Type' => 'text/plain' }, [ 'Not Found' ] ]
-      end
-    end
-  end
+  PLAIN = { 'Content-Type' => 'text/plain' }.freeze
+    #
+  NOT_FOUND = [ 404, PLAIN, [ 'Not Found' ] ].freeze
 
   class << self
 
@@ -56,14 +39,16 @@ class Gambino
         next if ! pattern.match?(pafo)
 
         req = Rack::Request.new(env)
+        env['gambino.res'] = Rack::Response.new
         def req.request; self; end
+        def req.response; env['gambino.res']; end
 
-        res = req.instance_exec(&block)
+        r = req.instance_exec(&block)
 
-        Gambino::Response.new(res).to_a
+        return respond(req, r)
       end
 
-      Gambino::Response.not_found_a
+      NOT_FOUND
     end
 
     # TODO deal with HEAD
@@ -73,6 +58,16 @@ class Gambino
     def compile(pattern)
 
       pattern
+    end
+
+    def respond(req, r)
+
+      res = req.response
+
+      r = [ r ] unless r.is_a?(Array)
+      r.each { |rr| res.write(rr.to_s) }
+
+      res.finish
     end
 
     def put_env(env)
