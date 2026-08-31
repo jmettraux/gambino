@@ -5,9 +5,30 @@
 
 class Gambino
 
+  class Response
+
+    def initialize(res)
+
+      @res = res
+    end
+
+    def to_a
+
+      [ 200, {}, @res.is_a?(Array) ? @res.map(&:to_s) : [ @res.to_s ] ]
+    end
+
+    class << self
+
+      def not_found_a
+
+        [ 404, { 'Content-Type' => 'text/plain' }, [ 'Not Found' ] ]
+      end
+    end
+  end
+
   class << self
 
-    %w[ get post put patch delete ].each do |method|
+    %w[ get post put patch delete head ].each do |method|
 
       define_method(method) do |pattern, &block|
 
@@ -15,17 +36,16 @@ class Gambino
       end
     end
 
+    def before(pattern=nil, &block)
+      (@befores ||= []) << [ compile(pattern), block ]
+    end
+    def after(pattern=nil, &block)
+      (@afters ||= []) << [ compile(pattern), block ]
+    end
+
     def call(env)
 
-      puts "#" * 80
-      puts env
-        .filter { |k, v|
-          k.is_a?(String) &&
-          k.match?(/\A[A-Z_]+\Z/) &&
-          ! k.match?(/\A(HTTP|SERVER|REMOTE|GATEWAY)_/) }
-        .map { |k, v|
-          "#{k}: #{v.inspect}" }
-        .join(', ')
+      put_env(env)
 
       meth = env['REQUEST_METHOD']
       pafo = env['PATH_INFO']
@@ -36,23 +56,35 @@ class Gambino
         next if ! pattern.match?(pafo)
 
         req = Rack::Request.new(env)
+        def req.request; self; end
 
-        res = instance_exec(req, &block)
-        res = res.is_a?(Array) ? res.map(&:to_s) : [ res.to_s ]
+        res = req.instance_exec(&block)
 
-        # TODO Content-Type
-
-        return [ 200, {}, res ]
+        Gambino::Response.new(res).to_a
       end
 
-      [ 404, { 'Content-Type' => 'text/plain' }, [ 'Not Found' ] ]
+      Gambino::Response.not_found_a
     end
+
+    # TODO deal with HEAD
 
     protected
 
     def compile(pattern)
 
       pattern
+    end
+
+    def put_env(env)
+
+      puts "   <<< " + env
+        .filter { |k, v|
+          k.is_a?(String) &&
+          k.match?(/\A[A-Z_]+\Z/) &&
+          ! k.match?(/\A(HTTP|SERVER|REMOTE|GATEWAY)_/) }
+        .map { |k, v|
+          "#{k}: #{v.inspect}" }
+        .join(', ')
     end
   end
 end
