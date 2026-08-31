@@ -9,6 +9,17 @@ class Gambino
     #
   NOT_FOUND = [ 404, PLAIN, [ 'Not Found' ] ].freeze
 
+  class Request < ::Rack::Request
+
+    def initialize(env)
+      super
+      env['gambino.res'] = Rack::Response.new
+    end
+
+    def request; self; end
+    def response; env['gambino.res']; end
+  end
+
   class << self
 
     %w[ get post put patch delete head ].each do |method|
@@ -38,10 +49,7 @@ class Gambino
         next if meth != method
         next if ! pattern.match?(pafo)
 
-        req = Rack::Request.new(env)
-        env['gambino.res'] = Rack::Response.new
-        def req.request; self; end
-        def req.response; env['gambino.res']; end
+        req = Gambino::Request.new(env)
 
         r = req.instance_exec(&block)
 
