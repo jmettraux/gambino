@@ -8,9 +8,9 @@ class Gambino
   # TODO deal with HEAD
   # TODO deal with error {}
 
-  PLAIN = { 'Content-Type' => 'text/plain' }.freeze
-    #
-  NOT_FOUND = [ 404, PLAIN, [ 'Not Found' ] ].freeze
+  NOT_FOUND = Rack::Response.new(
+    'Not Found', 404, 'Content-Type' => 'text/plain'
+      ).finish.freeze
 
   class Context
 
