@@ -5,6 +5,9 @@
 
 class Gambino
 
+  # TODO deal with HEAD
+  # TODO deal with error {}
+
   PLAIN = { 'Content-Type' => 'text/plain' }.freeze
     #
   NOT_FOUND = [ 404, PLAIN, [ 'Not Found' ] ].freeze
@@ -47,11 +50,15 @@ class Gambino
       @routes.each do |method, pattern, block|
 
         next if meth != method
-        next if ! pattern.match?(pafo)
+        next unless pattern.match?(pafo)
 
         req = Gambino::Request.new(env)
 
+        befores.each { |pa, bl| req.instance_exec(&bl) if pa.match?(pafo) }
+
         r = req.instance_exec(&block)
+
+        afters.each { |pa, bl| req.instance_exec(&bl) if pa.match?(pafo) }
 
         return respond(req, r)
       end
@@ -59,14 +66,16 @@ class Gambino
       NOT_FOUND
     end
 
-    # TODO deal with HEAD
-
     protected
 
     def compile(pattern)
 
+      return '/' if pattern == nil
       pattern
     end
+
+    def befores; (@befores ||= []); end
+    def afters; (@afters ||= []); end
 
     def respond(req, r)
 
