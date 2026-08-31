@@ -14,7 +14,7 @@ class Gambino
 
   class Context
 
-    attr_reader :env
+    attr_reader :env, :stage
 
     def initialize(env); @env = env; end
 
@@ -30,6 +30,8 @@ class Gambino
 
       res.finish
     end
+
+    def call(stage, block); @stage = stage; block.instance_exec(&block); end
   end
 
   class << self
@@ -41,12 +43,8 @@ class Gambino
       end
     end
 
-    def before(pattern=nil, &block)
-      befores << [ compile(pattern), block ]
-    end
-    def after(pattern=nil, &block)
-      afters << [ compile(pattern), block ]
-    end
+    def before(pattern=nil, &block); befores << [ compile(pattern), block ]; end
+    def after(pattern=nil, &block); afters << [ compile(pattern), block ]; end
 
     def call(env)
 
@@ -62,11 +60,11 @@ class Gambino
 
         ctx = Gambino::Context.new(env)
 
-        befores.each { |pa, bl| ctx.instance_exec(&bl) if pa.match?(pafo) }
+        befores.each { |pa, bl| ctx.call(:before, &bl) if pa.match?(pafo) }
 
-        r = ctx.instance_exec(&block)
+        r = ctx.call(:method, &block)
 
-        afters.each { |pa, bl| ctx.instance_exec(&bl) if pa.match?(pafo) }
+        afters.each { |pa, bl| ctx.call(:after, &bl) if pa.match?(pafo) }
 
         return ctx.respond(r)
       end
