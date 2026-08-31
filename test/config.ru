@@ -34,6 +34,8 @@ class RootEndpoints < Gambino
     /book/(one|two|three)
   }x do
 
+    content_type 'text/plain'
+
     "once upon a time in #{params.inspect}"
   end
 end

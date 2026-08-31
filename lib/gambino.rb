@@ -42,6 +42,8 @@ class Gambino
     end
 
     def call(stage, block); @stage = stage; self.instance_exec(&block); end
+
+    def content_type(mime); response.content_type = mime; end
   end
 
   class << self
