@@ -31,10 +31,20 @@ class Gambino
       res.finish
     end
 
-    def call(stage, block); @stage = stage; block.instance_exec(&block); end
+    def call(stage, block); @stage = stage; self.instance_exec(&block); end
   end
 
   class << self
+
+    def set(k, v) # TODO
+
+      settings[k] = v
+    end
+
+    def disable(k) # TODO
+
+      disabled[k] = true
+    end
 
     %w[ get post put patch delete head ].each do |method|
 
@@ -60,11 +70,11 @@ class Gambino
 
         ctx = Gambino::Context.new(env)
 
-        befores.each { |pa, bl| ctx.call(:before, &bl) if pa.match?(pafo) }
+        befores.each { |pa, bl| ctx.call(:before, bl) if pa.match?(pafo) }
 
-        r = ctx.call(:method, &block)
+        r = ctx.call(:method, block)
 
-        afters.each { |pa, bl| ctx.call(:after, &bl) if pa.match?(pafo) }
+        afters.each { |pa, bl| ctx.call(:after, bl) if pa.match?(pafo) }
 
         return ctx.respond(r)
       end
@@ -80,9 +90,12 @@ class Gambino
       pattern
     end
 
-    def routes; (@routes ||= []); end
-    def befores; (@befores ||= []); end
-    def afters; (@afters ||= []); end
+    def routes; @routes ||= []; end
+    def befores; @befores ||= []; end
+    def afters; @afters ||= []; end
+
+    def settings; @settings ||= []; end
+    def disabled; @disabled ||= []; end
 
     def put_env(env)
 
