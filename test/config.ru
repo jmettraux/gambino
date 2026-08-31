@@ -38,6 +38,11 @@ class RootEndpoints < Gambino
 
     "once upon a time in #{params.inspect}"
   end
+
+  get '/send/file' do
+
+    send_file 'test/some.txt'
+  end
 end
 
 run RootEndpoints

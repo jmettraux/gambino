@@ -7,6 +7,7 @@ class Gambino
 
   # TODO deal with HEAD
   # TODO deal with error {}
+  # TODO etag
 
   NOT_FOUND = Rack::Response.new(
     'Not Found', 404, 'Content-Type' => 'text/plain'
@@ -33,6 +34,9 @@ class Gambino
 
     def respond(r)
 
+      return r if is_rack_response_array?(r)
+      return r.finish if r.is_a?(Rack::Response)
+
       res = response
 
       r = [ r ] unless r.is_a?(Array)
@@ -43,7 +47,29 @@ class Gambino
 
     def call(stage, block); @stage = stage; self.instance_exec(&block); end
 
-    def content_type(mime); response.content_type = mime; end
+    def content_type(mime, opts={})
+
+      response.content_type = mime
+    end
+
+    def send_file(path, opts={})
+
+      st, hs, bo = Rack::Files.new(File.dirname(path)).serving(request, path)
+
+      Rack::Response.new(bo, st, hs).finish
+    end
+
+    def not_found; Gambino::NOT_FOUND; end
+
+    protected
+
+    def is_rack_response_array?(r)
+
+      return false unless r.is_a?(Array) && r.length == 3
+      return false unless r[0].is_a?(Integer) && r[1].is_a?(Hash)
+      return false unless r[2].is_a?(Array) || r[2].is_a?(Rack::Files::Iterator)
+      true
+    end
   end
 
   class << self
