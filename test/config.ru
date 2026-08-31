@@ -12,6 +12,11 @@ class RootEndpoints < Gambino
 
     'hello world'
   end
+
+  get '/foo' do
+
+    'foo bar'
+  end
 end
 
 run RootEndpoints
