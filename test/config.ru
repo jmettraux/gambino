@@ -29,6 +29,13 @@ class RootEndpoints < Gambino
 
     "hello #{params[:name]}!"
   end
+
+  get %r{
+    /book/(one|two|three)
+  }x do
+
+    "once upon a time in #{params.inspect}"
+  end
 end
 
 run RootEndpoints

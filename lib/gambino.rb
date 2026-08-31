@@ -20,8 +20,12 @@ class Gambino
 
       @env = env
 
-      @params = match.named_captures
-      @params.entries.each { |k, v| @params[k.to_s.to_sym] = v }
+      cs = match.named_captures; if cs.any?
+        @params = match.named_captures
+        @params.entries.each { |k, v| @params[k.to_s.to_sym] = v }
+      else
+        @params = (1..match.size - 1).inject({}) { |h, k| h[k] = match[k]; h }
+      end
     end
 
     def request; @req ||= Rack::Request.new(@env); end
@@ -90,18 +94,18 @@ class Gambino
 
     protected
 
-    def compile(pattern)
+    def compile(pat)
 
-      case pattern
+      case pat
       when nil then compile_str('/')
-      when String then compile_str(pattern)
-      when Regexp then compile_rex(pattern)
-      else fail ArgumentError.new("not a pattern #{pattern.inspect}"); end
+      when String then compile_str(pat)
+      when Regexp then compile_rex(pat)
+      else fail ArgumentError.new("not a pattern #{pat.inspect}"); end
     end
 
-    def compile_rex(pat) # TODO
+    def compile_rex(pat)
 
-      pat
+      Regexp.new("\\A#{ pat.source.strip }\\z")
     end
 
     def compile_str(pat)
