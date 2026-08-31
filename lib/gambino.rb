@@ -14,9 +14,15 @@ class Gambino
 
   class Context
 
-    attr_reader :env, :stage
+    attr_reader :env, :stage, :params
 
-    def initialize(env); @env = env; end
+    def initialize(env, match)
+
+      @env = env
+
+      @params = match.named_captures
+      @params.entries.each { |k, v| @params[k.to_sym] = v }
+    end
 
     def request; @req ||= Rack::Request.new(@env); end
     def response; @res ||= Rack::Response.new; end
@@ -66,9 +72,9 @@ class Gambino
       routes.each do |method, pattern, block|
 
         next if meth != method
-        next unless pattern.match?(pafo)
+        m = pattern.match(pafo); next unless m
 
-        ctx = Gambino::Context.new(env)
+        ctx = Gambino::Context.new(env, m)
 
         befores.each { |pa, bl| ctx.call(:before, bl) if pa.match?(pafo) }
 
@@ -86,8 +92,21 @@ class Gambino
 
     def compile(pattern)
 
-      return '/' if pattern == nil
-      pattern
+      case pattern
+      when nil then compile_str('/')
+      when String then compile_str(pattern)
+      when Regexp then compile_rex(pattern)
+      else fail ArgumentError.new("not a pattern #{pattern.inspect}"); end
+    end
+
+    def compile_rex(pat) # TODO
+
+      pat
+    end
+
+    def compile_str(pat)
+
+      Regexp.new("\\A#{ pat.gsub(/:(\w+)/, '(?<\1>[^/]+)') }\\z")
     end
 
     def routes; @routes ||= []; end
