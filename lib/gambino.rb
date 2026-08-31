@@ -21,7 +21,7 @@ class Gambino
       @env = env
 
       @params = match.named_captures
-      @params.entries.each { |k, v| @params[k.to_sym] = v }
+      @params.entries.each { |k, v| @params[k.to_s.to_sym] = v }
     end
 
     def request; @req ||= Rack::Request.new(@env); end
