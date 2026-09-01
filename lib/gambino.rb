@@ -54,7 +54,12 @@ class Gambino
       x[0].is_a?(Integer) && x[1].is_a?(Hash)
     end
 
-    def call(stage, block); @stage = stage; self.instance_exec(&block); end
+    def call(stage, block)
+
+      @stage = stage
+
+      self.instance_exec(&block)
+    end
 
     protected
 
@@ -175,8 +180,8 @@ class Gambino
     def afters; @afters ||= []; end
     def errors; @errors ||= []; end
 
-    def settings; @settings ||= []; end
-    def disabled; @disabled ||= []; end
+    def settings; @settings ||= {}; end
+    def disabled; @disabled ||= {}; end
 
     def handle_request(ctx, pafo, block)
 
