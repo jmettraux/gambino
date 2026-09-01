@@ -71,6 +71,14 @@ class RootEndpoints < Gambino
 
     redirect '/halt', 307
   end
+
+  get '/debug' do
+
+    session[:user] = 'toto'
+    p session
+
+    'OK'
+  end
 end
 
 run RootEndpoints

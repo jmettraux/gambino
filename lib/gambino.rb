@@ -66,6 +66,8 @@ class Gambino
     def request; @req ||= Rack::Request.new(@env); end
     def response; @res ||= Rack::Response.new; end
 
+    def session; request.session; end
+
     def content_type(mime, opts={})
 
       response.content_type = mime
