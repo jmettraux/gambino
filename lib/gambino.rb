@@ -78,11 +78,16 @@ class Gambino
 
     def halt(status, body='', headers={})
 
-      res =
-        status.is_a?(Rack::Response) ? status :
-        Rack::Response.new(body, status, headers)
+      throw :halt, make_response(status, headers, body)
+    end
 
-      throw :halt, res
+    def make_response(status, headers=nil, body=nil)
+
+      case status
+      when Rack::Response then status
+      when Array then Rack::Response.new(status[2], status[0], status[1])
+      else Rack::Response.new(body || '', status || 200, headers || {})
+      end
     end
 
     def etag(tag)
