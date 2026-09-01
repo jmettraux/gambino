@@ -81,7 +81,11 @@ class Gambino
 
     def halt(status, body='', headers={})
 
-      throw :halt, Rack::Response.new(body, status, headers)
+      res =
+        status.is_a?(Rack::Response) ? status :
+        Rack::Response.new(body, status, headers)
+
+      throw :halt, res
     end
 
     def etag(tag)
@@ -93,6 +97,16 @@ class Gambino
       elsif him = env['HTTP_IF_MATCH']
         halt 412 if him != '*' && him != t
       end
+    end
+
+    def redirect(uri, status=302)
+
+      uri = env['HTTP_REFERER'] if uri == :back
+
+      response.status = status
+      response['Location'] = uri
+
+      halt response
     end
   end
 

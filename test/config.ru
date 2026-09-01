@@ -66,6 +66,11 @@ class RootEndpoints < Gambino
 
     fail 'oh the horror'
   end
+
+  get '/redirect' do
+
+    redirect '/halt', 307
+  end
 end
 
 run RootEndpoints
