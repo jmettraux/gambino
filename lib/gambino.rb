@@ -33,15 +33,13 @@ class Gambino
 
       return r.finish if r.is_a?(Rack::Response)
 
-      arr =
+      st, hs, bd = arr =
         case r
         when Array then r
         when Integer then [ r, {}, [ '' ] ]
         when String then [ 200, {}, [ r ] ]
-        else [ 200, {}, [ '' ] ]
+        else [ 200, {}, [ r.to_s ] ]
         end
-
-      st, hs, bd = arr
 
       if st.is_a?(Rack::Response)
 
