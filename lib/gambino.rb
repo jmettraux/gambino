@@ -7,7 +7,8 @@ class Gambino
 
   # TODO deal with HEAD
   # TODO deal with error {}
-  # TODO etag
+
+  VERSION = '1.0.0'
 
   NOT_FOUND = Rack::Response.new(
     'Not Found', 404, 'Content-Type' => 'text/plain'
