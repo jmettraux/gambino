@@ -78,7 +78,7 @@ class Gambino
       Rack::Files.new(File.dirname(path)).serving(request, path)
     end
 
-    def not_found; Gambino::NOT_FOUND; end
+    #def not_found; Gambino::NOT_FOUND; end
 
     def halt(*res)
 
