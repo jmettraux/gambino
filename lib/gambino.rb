@@ -6,7 +6,6 @@
 class Gambino
 
   # TODO deal with HEAD
-  # TODO deal with error {}
 
   VERSION = '1.0.0'
 
@@ -32,15 +31,23 @@ class Gambino
 
     def respond(r)
 
-      return r.finish if r.is_a?(Rack::Response)
-      return r if is_rack_response_array?(r)
+      if is_rack_response_array?(r)
 
-      res = response
+        r
 
-      r = [ r ] unless r.is_a?(Array)
-      r.each { |rr| res.write(rr.to_s) }
+      elsif r.is_a?(Rack::Response)
 
-      res.finish
+        r.finish
+
+      else
+
+        res = response
+
+        r = [ r ] unless r.is_a?(Array)
+        r.each { |rr| res.write(rr.to_s) }
+
+        res.finish
+      end
     end
 
     def call(stage, block); @stage = stage; self.instance_exec(&block); end
@@ -111,6 +118,8 @@ class Gambino
     def before(pattern=nil, &block); befores << [ compile(pattern), block ]; end
     def after(pattern=nil, &block); afters << [ compile(pattern), block ]; end
 
+    def error(kla=nil, &block); errors << [ kla, block]; end
+
     def call(env)
 
       meth = env['REQUEST_METHOD']
@@ -127,12 +136,9 @@ class Gambino
 
         res =
           catch :halt do
-
-            befores.each { |pa, bl| ctx.call(:before, bl) if pa.match?(pafo) }
-            r = ctx.call(:method, block)
-            afters.each { |pa, bl| ctx.call(:after, bl) if pa.match?(pafo) }
-
-            r
+            handle_request(ctx, pafo, block)
+          rescue => err
+            handle_error(ctx, err)
           end
 
         return ctx.respond(res)
@@ -165,9 +171,33 @@ class Gambino
     def routes; @routes ||= []; end
     def befores; @befores ||= []; end
     def afters; @afters ||= []; end
+    def errors; @errors ||= []; end
 
     def settings; @settings ||= []; end
     def disabled; @disabled ||= []; end
+
+    def handle_request(ctx, pafo, block)
+
+      befores.each { |pa, bl| ctx.call(:before, bl) if pa.match?(pafo) }
+
+      res = ctx.call(:method, block)
+
+      afters.each { |pa, bl| ctx.call(:after, bl) if pa.match?(pafo) }
+
+      res
+    end
+
+    def handle_error(ctx, err)
+
+      ctx.env['gambino.error'] = err
+
+      errors.each do |kla, block|
+
+        return ctx.call(:error, block) if kla == nil || err.is_a?(kla)
+      end
+
+      raise err
+    end
 
     def put_env(env)
 

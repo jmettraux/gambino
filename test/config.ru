@@ -54,6 +54,18 @@ class RootEndpoints < Gambino
     etag "hello4b02c354c06582"
     'The Remains of the Day'
   end
+
+  error do
+
+    err = env['gambino.error']
+
+    [ 500, {}, [ "ouch: #{err.message.inspect}" ] ]
+  end
+
+  get '/error' do
+
+    fail 'oh the horror'
+  end
 end
 
 run RootEndpoints
