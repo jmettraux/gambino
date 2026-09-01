@@ -29,33 +29,29 @@ class Gambino
       end
     end
 
-    def finish(r)
+    def finish(res)
 
-      return r.finish if r.is_a?(Rack::Response)
+      return res.finish if res.is_a?(Rack::Response)
+      return res if is_finished?(res)
 
-      st, hs, bd = arr =
+      rez = response
+
+      (res.is_a?(Array) ? res : [ res ]).each do |r|
         case r
-        when Array then r
-        when Integer then [ r, {}, [ '' ] ]
-        when String then [ 200, {}, [ r ] ]
-        else [ 200, {}, [ r.to_s ] ]
+        when Hash then rez.headers.merge!(r)
+        when String then rez.write(r)
+        when Integer then rez.status = r
+        else rez.write(r.to_s)
         end
-
-      if st.is_a?(Rack::Response)
-
-        st.finish
-
-      elsif arr.length == 3 && st.is_a?(Integer) && hs.is_a?(Hash)
-
-        arr[2] = [ bd ] if bd.is_a?(String)
-        arr
-
-      else
-
-        res = response
-        arr.each { |e| res.write(e.to_s) }
-        res.finish
       end
+
+      rez.finish
+    end
+
+    def is_finished?(x)
+
+      x.is_a?(Array) && x.length == 3 &&
+      x[0].is_a?(Integer) && x[1].is_a?(Hash)
     end
 
     def call(stage, block); @stage = stage; self.instance_exec(&block); end
@@ -77,9 +73,9 @@ class Gambino
 
     def not_found; Gambino::NOT_FOUND; end
 
-    def halt(status, body='', headers={})
+    def halt(*res)
 
-      throw :halt, [ status, headers, body ]
+      throw :halt, res
     end
 
     def etag(tag)
