@@ -29,7 +29,7 @@ class Gambino
       end
     end
 
-    def respond(r)
+    def finish(r)
 
       if is_rack_response_array?(r)
 
@@ -42,10 +42,7 @@ class Gambino
       else
 
         res = response
-
-        r = [ r ] unless r.is_a?(Array)
-        r.each { |rr| res.write(rr.to_s) }
-
+        (r.is_a?(Array) ? r : [ r ]).each { |rr| res.write(rr.to_s) }
         res.finish
       end
     end
@@ -153,7 +150,7 @@ class Gambino
             handle_error(ctx, err)
           end
 
-        return ctx.respond(res)
+        return ctx.finish(res)
       end
 
       NOT_FOUND
