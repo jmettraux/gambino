@@ -139,8 +139,6 @@ class Gambino
       meth = env['REQUEST_METHOD']
       pafo = env['PATH_INFO']
 
-      put_env(env) unless pafo.start_with?('/.well-known/')
-
       routes.each do |method, pattern, block|
 
         next if meth != method
@@ -211,18 +209,6 @@ class Gambino
       end
 
       raise err
-    end
-
-    def put_env(env)
-
-      puts "   <<< " + env
-        .filter { |k, v|
-          k.is_a?(String) &&
-          k.match?(/\A[A-Z_]+\Z/) &&
-          ! k.match?(/\A(HTTP|SERVER|REMOTE|GATEWAY)_/) }
-        .map { |k, v|
-          "#{k}: #{v.inspect}" }
-        .join(', ')
     end
   end
 end
