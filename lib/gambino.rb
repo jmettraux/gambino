@@ -31,14 +31,31 @@ class Gambino
 
     def finish(r)
 
-      case r
-      when Array
-        r
-      when Rack::Response
-        r.finish
+      return r.finish if r.is_a?(Rack::Response)
+
+      arr =
+        case r
+        when Array then r
+        when Integer then [ r, {}, [ '' ] ]
+        when String then [ 200, {}, [ r ] ]
+        else [ 200, {}, [ '' ] ]
+        end
+
+      st, hs, bd = arr
+
+      if st.is_a?(Rack::Response)
+
+        st.finish
+
+      elsif arr.length == 3 && st.is_a?(Integer) && hs.is_a?(Hash)
+
+        arr[2] = [ bd ] if bd.is_a?(String)
+        arr
+
       else
+
         res = response
-        (r.is_a?(Array) ? r : [ r ]).each { |rr| res.write(rr.to_s) }
+        arr.each { |e| res.write(e.to_s) }
         res.finish
       end
     end
@@ -64,16 +81,7 @@ class Gambino
 
     def halt(status, body='', headers={})
 
-      throw :halt, make_response(status, headers, body)
-    end
-
-    def make_response(status, headers=nil, body=nil)
-
-      case status
-      when Rack::Response then status
-      when Array then Rack::Response.new(status[2], status[0], status[1])
-      else Rack::Response.new(body || '', status || 200, headers || {})
-      end
+      throw :halt, [ status, headers, body ]
     end
 
     def etag(tag)
