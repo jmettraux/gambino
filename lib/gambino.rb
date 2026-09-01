@@ -31,9 +31,10 @@ class Gambino
 
     def finish(r)
 
-      if is_rack_response_array?(r)
+      case r
+      when Array
         r
-      elsif r.is_a?(Rack::Response)
+      when Rack::Response
         r.finish
       else
         res = response
@@ -60,14 +61,6 @@ class Gambino
     end
 
     def not_found; Gambino::NOT_FOUND; end
-
-    def is_rack_response_array?(r)
-
-      return false unless r.is_a?(Array) && r.length == 3
-      return false unless r[0].is_a?(Integer) && r[1].is_a?(Hash)
-      return false unless r[2].is_a?(Array) || r[2].is_a?(Rack::Files::Iterator)
-      true
-    end
 
     def halt(status, body='', headers={})
 
