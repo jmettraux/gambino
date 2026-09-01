@@ -192,16 +192,20 @@ class Gambino
 
       befores.each { |pa, bl| ctx.call(:before, bl) if pa.match?(pafo) }
 
-      res = ctx.call(:method, block)
+      ctx.call(:method, block)
+
+    rescue => err
+
+      ctx.env['gambino.error'] = err
+
+      raise err
+
+    ensure
 
       afters.each { |pa, bl| ctx.call(:after, bl) if pa.match?(pafo) }
-
-      res
     end
 
     def handle_error(ctx, err)
-
-      ctx.env['gambino.error'] = err
 
       errors.each do |kla, block|
 
