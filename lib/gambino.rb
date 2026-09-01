@@ -32,15 +32,10 @@ class Gambino
     def finish(r)
 
       if is_rack_response_array?(r)
-
         r
-
       elsif r.is_a?(Rack::Response)
-
         r.finish
-
       else
-
         res = response
         (r.is_a?(Array) ? r : [ r ]).each { |rr| res.write(rr.to_s) }
         res.finish
@@ -61,9 +56,7 @@ class Gambino
 
     def send_file(path, opts={})
 
-      st, hs, bo = Rack::Files.new(File.dirname(path)).serving(request, path)
-
-      Rack::Response.new(bo, st, hs)
+      Rack::Files.new(File.dirname(path)).serving(request, path)
     end
 
     def not_found; Gambino::NOT_FOUND; end
