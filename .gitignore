@@ -1,6 +1,9 @@
 
 .vim*
 
+.probatio-output.rb
+.test-point
+
 tmp/
 
 .claude*

@@ -49,5 +49,15 @@ group 'Gambino' do
 
     assert get('/etag', etag: etag), [ 304, '' ]
   end
+
+  test 'GET /error' do
+
+    assert get('/error'), [ 500, 'ouch: "oh the horror"' ]
+  end
+
+  test 'GET /redirect' do
+
+    assert get('/redirect')[0], 307
+  end
 end
 
