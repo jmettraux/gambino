@@ -1,18 +1,34 @@
 GEM
   remote: https://rubygems.org/
   specs:
+    base64 (0.2.0)
+    colorato (1.1.0)
+    diff-lcs (1.6.2)
     nio4r (2.7.5)
+    ostruct (0.6.3)
+    probatio (1.6.2)
+      colorato (~> 1.0)
+      diff-lcs (~> 1.6)
+      stringio
     puma (8.0.2)
       nio4r (~> 2.0)
     rack (2.2.24)
+    scorn (0.4.1)
+      base64
+      ostruct
+      webrick
+    stringio (3.2.0)
+    webrick (1.9.2)
 
 PLATFORMS
   ruby
   x86_64-openbsd-7.8
 
 DEPENDENCIES
+  probatio
   puma
   rack (= 2.2.24)
+  scorn
 
 BUNDLED WITH
    2.6.9
