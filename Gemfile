@@ -8,6 +8,8 @@ gem 'puma'
 group :test do
 
   gem 'probatio'
-  gem 'scorn'
+
+  #gem 'scorn'
+  gem 'scorn', path: '../scorn/'
 end
 

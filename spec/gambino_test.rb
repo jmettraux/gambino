@@ -1,4 +1,3 @@
-
 #
 # Testing Gambino
 #
@@ -7,12 +6,48 @@
 
 group 'Gambino' do
 
-  test 'simple GET' do
+  test 'GET /' do
 
-    r = get('/')
+    assert get('/'), [ 200, 'hello world' ]
+  end
 
-    assert r._response._c, 200
-    assert r, 'hello world'
+  test 'GET /foo' do
+
+    assert get('/foo'), [ 200, 'foo bar' ]
+  end
+
+  test 'GET /greet/bob' do
+
+    assert get('/greet/bob'), [ 200, 'hello bob!' ]
+  end
+
+  test 'GET /book/two' do
+
+    assert get('/book/two'), [ 200, 'once upon a time in {1 => "two"}' ]
+  end
+
+  test 'GET /send/file' do
+
+    assert get('/send/file'), [ 200, "Lore Ipsum SendFile is working...\n" ]
+  end
+
+  test 'GET /halt' do
+
+    assert get('/halt'), [ 400, 'Hold My Beer' ]
+  end
+
+  test 'GET /etag' do
+
+    r = get('/etag')
+
+    assert r[0], 200
+    assert r[1], 'The Remains of the Day'
+
+    etag = r[1]._response._headers['etag']
+
+    assert etag, "\"hello4b02c354c06582\""
+
+    assert get('/etag', etag: etag), [ 304, '' ]
   end
 end
 

@@ -9,9 +9,11 @@ class Probatio::Context
 
   BASE_URI = 'http://127.0.0.1:7080'
 
-  def get(path)
+  def get(path, opts={})
 
-    Scorn.get(File.join(BASE_URI, path))
+    r = Scorn.get(File.join(BASE_URI, path), opts)
+
+    [ r._response._c, r ]
   end
 end
 
