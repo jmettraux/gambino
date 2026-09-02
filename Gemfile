@@ -10,6 +10,7 @@ group :test do
   gem 'probatio'
 
   #gem 'scorn'
-  gem 'scorn', path: '../scorn/'
+  #gem 'scorn', path: '../scorn/'
+  gem 'scorn', git: 'https://github.com/jmettraux/scorn'
 end
 

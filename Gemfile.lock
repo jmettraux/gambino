@@ -1,5 +1,6 @@
-PATH
-  remote: ../scorn
+GIT
+  remote: https://github.com/jmettraux/scorn
+  revision: c960dfd0054eebed947057f09949f74f5a809588
   specs:
     scorn (0.5.0)
       base64
