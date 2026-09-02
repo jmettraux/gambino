@@ -79,6 +79,11 @@ class RootEndpoints < Gambino
 
     'OK'
   end
+
+  get '/query/:name' do
+
+    params.inspect
+  end
 end
 
 run RootEndpoints

@@ -63,9 +63,10 @@ group 'Gambino' do
 
   test 'GET /query/foo?page=1&offset=none' do
 
-    p __test_name
-    p test_uri
-    #get '/query/foo?page=1&offset=none'
+    r = get(test_uri)
+
+    assert r[0], 200
+    assert eval(r[1]), { name: 'foo', page: '1', offset: 'none' }
   end
 end
 

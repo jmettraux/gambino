@@ -21,12 +21,18 @@ class Gambino
 
       @env = env
 
-      cs = match.named_captures; if cs.any?
-        @params = match.named_captures
-        @params.entries.each { |k, v| @params[k.to_s.to_sym] = v }
-      else
-        @params = (1..match.size - 1).inject({}) { |h, k| h[k] = match[k]; h }
-      end
+      params =
+        if (cs = match.named_captures).any?
+          cs
+        else
+          (1..match.size - 1).inject({}) { |h, k| h[k] = match[k]; h }
+        end
+      query =
+        Rack::Utils.parse_query(env['QUERY_STRING'])
+
+      @params =
+        query.merge(params)
+          .transform_keys { |k| k.is_a?(Integer) ? k : k.to_sym }
     end
 
     def finish(res)
