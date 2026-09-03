@@ -69,11 +69,20 @@ group 'Gambino' do
     assert eval(r[1]), { name: 'foo', page: '1', offset: 'none' }
   end
 
-    # dealt with by Rack::Head ;-)
-    #
   test 'HEAD /foo' do
 
     assert head(test_uri), [ 200, '' ]
+  end
+
+  # To be on the safe side...
+  #
+  test 'HEAD /foo with curl' do
+
+    r = `curl --head -v --silent http://127.0.0.1:7080#{test_uri} 2>&1`
+
+    assert r, /\n> HEAD \/foo HTTP\/1\.1\r\n/
+    assert r, /\ncontent-length: 7\r\n/
+    refute r, /foo bar/
   end
 end
 
