@@ -16,6 +16,13 @@ class Probatio::Context
     [ r._response._c, r ]
   end
 
+  def head(path, opts={})
+
+    r = Scorn.head(File.join(BASE_URI, path), opts)
+
+    [ r._response._c, r ]
+  end
+
   def test_uri
 
     __test_name.split(/\s+/)[1]

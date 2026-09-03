@@ -5,8 +5,6 @@
 
 class Gambino
 
-  # TODO deal with HEAD
-
   VERSION = '1.0.0'
 
   NOT_FOUND = Rack::Response.new(
@@ -118,7 +116,7 @@ class Gambino
     def set(k, v); settings[k] = v; end
     def disable(k); disabled[k] = true; end
 
-    %w[ get post put patch delete head ].each do |method|
+    %w[ get post put patch delete ].each do |method|
 
       define_method(method) do |pattern, &block|
         routes << [ method.upcase, compile(pattern), block ]
@@ -133,6 +131,9 @@ class Gambino
     def call(env)
 
       meth = env['REQUEST_METHOD']
+      meth = 'GET' if meth == 'HEAD'
+        # seems like it's all that's needed, no Rack::Head :-|
+
       pafo = env['PATH_INFO']
 
       routes.each do |method, pattern, block|

@@ -86,5 +86,8 @@ class RootEndpoints < Gambino
   end
 end
 
+#use Rack::Head
+  # seems unnecessary...
+
 run RootEndpoints
 

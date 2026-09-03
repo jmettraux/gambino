@@ -68,5 +68,12 @@ group 'Gambino' do
     assert r[0], 200
     assert eval(r[1]), { name: 'foo', page: '1', offset: 'none' }
   end
+
+    # dealt with by Rack::Head ;-)
+    #
+  test 'HEAD /foo' do
+
+    assert head(test_uri), [ 200, '' ]
+  end
 end
 
