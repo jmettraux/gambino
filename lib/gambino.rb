@@ -115,15 +115,8 @@ class Gambino
 
   class << self
 
-    def set(k, v) # TODO
-
-      settings[k] = v
-    end
-
-    def disable(k) # TODO
-
-      disabled[k] = true
-    end
+    def set(k, v); settings[k] = v; end
+    def disable(k); disabled[k] = true; end
 
     %w[ get post put patch delete head ].each do |method|
 
